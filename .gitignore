@@ -58,3 +58,5 @@ target/
 
 #OSX ignore
 .DS_Store
+#ipython
+.ipynb_checkpoints/
