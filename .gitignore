@@ -60,3 +60,8 @@ target/
 .DS_Store
 #ipython
 .ipynb_checkpoints/
+#tex
+doc/*.synctex.gz
+doc/*.out
+doc/*.toc
+doc/*.aux
