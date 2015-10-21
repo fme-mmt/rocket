@@ -103,7 +103,7 @@ class Element(object):
         Computes the total enthalpy in J/kg
         """
         return self.cp_(T)*T
-        
+
     def so(self,T):
         """
         Computes enthropy in J/mol K
@@ -116,6 +116,7 @@ class Element(object):
         else:
             raise ValueError("Temperature out of range")
 
+
     def go(self,T):
         """
         Computes the Gibbs free energy from the sensible enthalpy in
@@ -125,7 +126,7 @@ class Element(object):
             return self.ho(T)-self.so(T)*T
         else:
             raise ValueError("Temperature out of range")
-        
+
 
     def __repr__(self):
         return """<element> %s"""%(self.formula)
@@ -164,7 +165,7 @@ class Mixture(object):
 
     You can also delete components of a mixture.  Needed by the
     MoistAir class
-    
+
     >>> mix.delete('CO2')
     >>> print mix
     <Mixture>:
@@ -220,8 +221,8 @@ class Mixture(object):
     def mm(self):
         """
         Computes the equivalent molar mass for a mix
-        
-        .. math:: 
+
+        .. math::
 
           M_m = \\frac{1}{N_m} \\sum_i N_i M_i
         """
@@ -263,7 +264,7 @@ class Mixture(object):
             ext = 0
             for comp in self.mix:
                 Nm += comp[1]
-                
+
             for comp in self.mix:
                 Mm += comp[1]*comp[0].mm
 
@@ -290,7 +291,7 @@ class Mixture(object):
         Computes the heat capacity
         """
         return self.extensive('cp_',298.15)
-        
+
     def ho(self,T):
         return self.extensive('ho',T)
 
@@ -298,7 +299,8 @@ class Mixture(object):
         return self.cp_(T)*T
 
     def so(self,T):
-        return self.extensive('so',T)
+        N = float(sum(n for _,n in self.mix))
+        return self.extensive('so',T) - R * sum(log(n/N) for _,n in self.mix if n > 0)
 
     def go(self,T):
         return self.extensive('go',T)
@@ -399,7 +401,7 @@ class Elementdb(object):
             dbname = resource_filename(
                 Requirement.parse("thermopy"),'thermopy/BURCAT_THR.xml')
             database = open(dbname,'r')
-            
+
         tree = parse(database)
         self.db = tree.getroot()
 
@@ -431,7 +433,7 @@ class Elementdb(object):
                         text:
                     phase = specie.find("phase")
                     coefficients = phase.find("coefficients")
-                    low = coefficients.find("range_Tmin_to_1000") 
+                    low = coefficients.find("range_Tmin_to_1000")
                     for (i,c) in zip(range(7),low):
                         Tmin_[i] = float(c.text)
 
@@ -449,9 +451,9 @@ class Elementdb(object):
 
                     mm = float(phase.find("molecular_weight").text)/1000
                     hfr = float(coefficients.find("hf298_div_r").text)
-                    
+
                     return Element(formula,Tmin_,_Tmax,mm,hfr,comp)
-                    
+
             except:
                 pass
 
@@ -478,4 +480,3 @@ if __name__ == '__main__':
                              ("AR REF ELEMENT",0.9365),
                              ("O2 REF ELEMENT",1.2)])
     mix.aggregate()
-
