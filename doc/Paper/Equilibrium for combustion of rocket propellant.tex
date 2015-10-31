@@ -1,0 +1,266 @@
+% FORMAT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper,10pt]{article}
+\usepackage[margin=1in]{geometry}
+
+\pagestyle{headings}  
+
+\setlength{\parskip}{0.15cm}
+\renewcommand{\labelitemi}{\tiny{$\blacksquare$}}
+
+
+% LANG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+
+
+% MATH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{enumerate}
+\usepackage{bigints}
+\newcommand{\bm}{\boldsymbol}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\mA}{{\mathbb A}}
+\newcommand{\mB}{{\mathbb B}}
+\newcommand{\mC}{{\mathbb C}}
+\newcommand{\mD}{{\mathbb D}}
+\newcommand{\mE}{{\mathbb E}}
+\newcommand{\mI}{{\mathbb I}}
+\newcommand{\mN}{{\mathbb N}}
+\newcommand{\mQ}{{\mathbb Q}}
+\newcommand{\mP}{{\mathbb P}}
+\newcommand{\mR}{{\mathbb R}}
+\newcommand{\mS}{{\mathbb S}}
+\newcommand{\mZ}{{\mathbb Z}}
+\newcommand{\cA}{{\mathcal A}}
+\newcommand{\cb}{{\mathcal B}}
+\newcommand{\cC}{{\mathcal C}}
+\newcommand{\cE}{{\mathcal E}}
+\newcommand{\cF}{{\mathcal F}}
+\newcommand{\cG}{{\mathcal G}}
+\newcommand{\cH}{{\mathcal H}}
+\newcommand{\cI}{{\mathcal I}}
+\newcommand{\cJ}{{\mathcal J}}
+\newcommand{\cL}{{\mathcal L}}
+\newcommand{\cM}{{\mathcal M}}
+\newcommand{\cO}{{\mathcal O}}
+\newcommand{\cP}{{\mathcal P}}
+\newcommand{\cT}{{\mathcal T}}
+\newcommand{\cU}{{\mathcal U}}
+\newcommand{\cV}{{\mathcal V}}
+\newcommand{\cZ}{{\mathcal Z}}
+\newcommand{\sM}{{\mathscr M}}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\bia}{B}
+\DeclareMathOperator{\EQM}{EQM}
+\DeclareMathOperator{\EfRel}{Ef.Rel.}
+\newcommand*{\defeq}{\mathrel{\vcenter{\baselineskip0.5ex \lineskiplimit0pt
+                     \hbox{\scriptsize.}\hbox{\scriptsize.}}}%
+                     =}
+\usepackage{framed}
+\usepackage{mathrsfs}
+\usepackage{framed}
+\usepackage{mathrsfs}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+\newtheorem{ex}{Example}[section]
+
+\theoremstyle{remark}
+\newtheorem{rem}{Remark}[section]
+\newtheorem{nota}{Notation}[section]
+\newtheorem{ter}{Terminology}[section]
+
+
+% CHEM%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[version=3]{mhchem}
+
+
+% BIB %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+% GRAPHICS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{color}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{myred}{RGB}{139,0,0}
+\definecolor{myblue}{RGB}{0,0,205}
+\definecolor{myorange}{RGB}{255,140,0}
+
+
+% OTHERS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{todonotes}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=XYZ}%     zoom par défaut
+\usepackage{syntonly}
+%\syntaxonly
+
+\renewcommand{\sectionautorefname}{\S}
+\renewcommand{\subsectionautorefname}{\S}
+\newcommand{\quotes}[1]{``#1''}
+
+
+\title{
+    \rule{14cm}{0.5mm}\\
+    Equilibrium for combustion of rocket propellant\\[0.5cm]
+    \large{Mathematical Models of Technology}
+    \rule{14cm}{0.5mm}
+}
+\author{\normalsize A. Delgado Calvache, F. Granell Yuste, M. Llinàs Comas and J. Puig Lescure\\{\small Supervised by: J. Saludes Closa}}
+\date{\normalsize \today}
+
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+\section*{Abstract}
+Rocket propellant is a material used by a rocket that reacts chemically, ejecting a reaction mass with very high speed to produce thrust, and thus provide spacecraft propulsion. The type of propellant varies depending on the type of rocket. In this paper, we focus on rockets that are propelled by means of combustion reactions, which are exothermic and which happen at high temperatures. Under these conditions, the components dissociate, which makes the parameters of the reaction difficult to find. Our aim is to determine them at the same time as we provide a full open-source solver for combustion problems involving a gas mixture with dissociation.
+\section{Preliminaries}
+\subsection{Review of Kinetic Molecular Theory}
+\paragraph{Ideal Gases}The study of the behaviour and macroscopic properties of gases began in the eighteenth century. A first result concerning these is the \textit{Ideal Gas Law}\footnote{An alternative approach consists of defining ideal gases as those for which the Ideal Gas Law holds.}, according to which the pressure $P$, volume $V$ and temperature $T$ of an ideal gas relate to each other through the formula
+\begin{equation}
+PV=nRT,
+\end{equation}
+where $n$ is the number of moles contained in the gas and $R=0,082 \text{ atm·L·mol$^{-1}$·K$^{-1}$}$ in the SI. An equivalent expressions of this formula is
+\begin{equation}
+PM=\rho RT,
+\end{equation}
+where $M$ is the molecular mass of the gas and $\rho$ is its density.
+
+Since gas properties depend on temperature and pressure conditions, it is useful to set fixed values for them. The IUPAC established that the \textit{standard temperature and pressure} (STP) are 273,15 K (0 ~ºC) and 1 bar (0.9869 atm), whereas the \textit{normal temperature and pressure} (NTP) are 298,15 K (25 ºC) and 1 atm. An important result is that the volume of 1 mol of an ideal gas in STP is 22,414 litres.
+\paragraph{Mixture of gases}John Dalton proposed that gases consist mostly of empty space, being given their low density and high compressibility. Hence, when two or more different gases occupy the same volume, they behave entirely independently, ans so each gas in a mixture of gases exerts the same pressure as if it were present alone in the container. This pressure is called the \textit{partial pressure} of the gas $P_i$. According to \textit{Dalton's Law of Partial Pressures}, the total pressure of a mixture of gases equals the sum of the partial pressures. Mathematically, given a mixture of $n$ gases in a container,
+\begin{equation}
+P = \sum_{i = 1}^n P_i.
+\end{equation}
+If we now write the total pressure $P$ of the gas in terms of the total number of moles, the constant $R$, the temperature $T$ and volume $V$, we can express the partial pressure of each component in the mixture as
+\begin{equation}
+P_i = n_i\frac{RT}{V} = n_i\frac{P}{n} = \frac{n_i}{n}P = \chi_i P,
+\end{equation}
+which leads to the definition of the \textit{molar fraction} $\chi_i$ of the gas $i$, seen as the fraction of the mixture a specific gas is. Equivalent expressions for the molar fraction are
+\begin{equation}
+\chi_i = \frac{n_i}{n} = \frac{P_i}{P} = \frac{V_i}{V}.
+\end{equation}
+\subsection{Review of Thermodynamics}
+Around the first half of the nineteenth century, the prevailing electrochemical theory could not successfully explain which the causes of chemical reactions are. As a result, scientists tried to find an answer in Thermodynamics.
+\paragraph{First Law of Thermodynamics}\quotes{The total energy of an isolated system is constant; energy can be transformed from one form to another, but cannot be created or destroyed.} Mathematically, we write
+\begin{equation}
+\Delta U = Q + W,
+\end{equation}
+where $U$ is the \textit{state variable}\footnote{A state variable is one of the set of variables that are used to describe the mathematical \quotes{state} of a dynamical system. Intuitively, the state of a system describes enough about the system to determine its future behaviour in the absence of any external forces affecting the system. In thermodynamics, a state variable is also called a state function. Examples include temperature, pressure, volume, internal energy, enthalpy, and entropy. In contrast, heat and work are not state functions, but process functions.} internal energy (i.e. energy contained within the system, while excluding the kinetic or potential energy of the system as a whole due to external force fields), $Q$ is the heat involved in the process  and $W$ is the work performed through compression or expansion of the system, which can be written as
+\begin{equation}
+W = -P_{\text{ext}}\Delta V = -\Delta nRT,
+\end{equation}
+where $P_{\text{ext}}$ is the pressure that the exterior exerts upon the gas and $\Delta n$ is the variation in the number of moles.
+
+Let us now consider some reagents as the initial state of a thermodynamic system and some products as the final state. If the reaction occurs at a constant volume, there is no work performed. Hence,
+\begin{equation}
+\Delta U = Q_v,
+\end{equation}
+where the constant-volume heat can be written as  $ Q_v = Q_p + W$ (notice that subindices $v$ and $p$  have respectively been used to account for constant-volume and constant-pressure processes). For the sake of convenience, let us define the \textit{enthalpy} $H$ as
+\begin{equation}
+H = U + PV.
+\end{equation}
+Indeed, in constant-pressure systems we can write
+\begin{equation}
+\Delta H = H_f - H_i = (U_f + PV_f) - (U_i + PV_i) = (U_f - U_i) + P(V_f - V_i) = \Delta U + P\Delta V,
+\end{equation}
+and so $\Delta H = Q_p$.
+
+It is important to notice that enthalpy itself is a thermodynamic potential, so in order to measure the enthalpy of a system, we must refer to a defined reference point. Therefore what we measure is the change in enthalpy, $\Delta H$.
+
+It is useful to work with values of the enthalpy at particular conditions. In particular, the \textit{standard enthalpy of reaction} $\Delta H_r^0$ is the change in the enthalpy of a reaction in which the reagents and products are at standard conditions of pressure and temperature (if not stated differently). A particular case of standard enthalpies of reaction is the \textit{standard enthalpy of formation} $\Delta H_f^0$, which corresponds to the formation of 1 mol of a substance from the basic elements in the standard states of reference (i.e. the more stable forms of the elements at 1 bar of pressure and a given temperature), which are assigned a null value of enthalpy. Other particular cases are the \textit{reticular energy} (i.e. the energy released when a mol of crystal is formed from the corresponding ions in gaseous state) and the \textit{bond dissociation energy} (i.e. the energy needed to brake 1 mol of covalent bonds at a fundamental state).
+
+The standard enthalpy of a reaction $\Delta H_r^0$ can be calculated using the formula
+\begin{equation}
+\Delta H_r^0=\sum_{p\in P}v_p\Delta H_f^0(p) - \sum_{r\in R} v_r\Delta_f^0(r),
+\end{equation}
+where $P$ and $R$ are the set of products and reagents, respectively, and $v_p$ and $v_r$ are the stoichiometric coefficients in the reaction. Alternatively, one can use the \textit{Hess's Law}, according to which if a reaction can be expressed as the sum of several elementary reactions, then the variation in the enthalpy of the reaction can be calculated adding up the variations in the enthalpy of each elementary reaction.
+
+A negative sign of $\Delta H$ represents that the enthalpy of the products is less than the enthalpy of the reagents. This drop appears as heat transferred to the environment. Conversely, in order to gain enthalpy it is necessary to absorb heat from the environment.
+
+An enthalpy diagram is a schematic representation of the variations of enthalpy in a process.
+
+{\color{red}Aquí va imatge d'un diagrama entàlpic.}
+
+\paragraph{Second Law of Thermodynamics}The entropy $S$ of a system measures the number of specific ways in which it may be arranged; it is commonly understood as a measure of disorder. The \textit{Second Law of Thermodynamics} states that \quotes{the entropy of an isolated system never decreases; such systems spontaneously proceed towards thermodynamic equilibrium, the configuration with maximum entropy.} Given a system, the change in entropy can be expressed as
+\begin{equation}
+\Delta S = \frac{Q_{\text{rev}}}{T},
+\end{equation}
+where $Q_{\text{rev}}$ is the reversible heat or heat that intervenes in a reversible process.
+\paragraph{Third Law of Thermodynamics}This principle establishes which situations have the minimum possible entropy. It is stated as \quotes{the entropy of a perfect pure crystal at 0 K is zero}.
+\paragraph{Spontaneity}In order to predict whether a process is spontaneous or not, we need to take into account that
+\begin{equation}\label{eq:second_law_thermodynamics}
+\Delta S_{\text{universe}} = \Delta S_{\text{system}} + \Delta S_{\text{environment}}>0,
+\end{equation}
+which is another way of expressing the Second Law of Thermodynamics. In practice, the variation in the entropy of the environment is difficult to calculate. Nevertheless, we can assume that these changes are due to $-\Delta H_{\text{system}}$ and hence
+\begin{equation}
+\Delta S_{\text{environment}} = -\frac{\Delta H_{\text{system}}}{T}.
+\end{equation}
+Using this formula in \eqref{eq:second_law_thermodynamics}, we get
+\begin{equation}
+\Delta H - T\Delta S < 0,
+\end{equation}
+where $S$ denotes $S_{\text{system}}$. Consequently, the issue of spontaneity can now be addressed if we define the \textit{Gibbs free energy} $G$ as
+\begin{equation}
+G = H - TS,
+\end{equation}
+so in order to know the spontaneity of a process, we follow the next table:
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{cccc}
+   $\Delta H$ & $\Delta S$ & $\Delta G$ & Nature of the process  \\ \hline
+   $-$ & $-$ & ? & spontaneous for small $T$\\
+   $-$ & $+$ & $-$ & spontaneous\\
+   $+$ & $+$ & ? & spontaneous for large $T$\\
+   $+$ & $-$ & $+$ & non spontaneous\\
+\end{tabular}
+\caption{Criteria for predicting the nature of a thermodynamic process.}
+\end{center}
+\end{table}
+\subsection{Review of Chemical Equilibrium}
+As we have seen, there are chemical reactions that are reversible. We say that the chemical equilibrium is attained when the concentrations of the species involved remain constant along time. This is certainly a dynamical situation in which products are formed and destroyed simultaneously. For instance, nitrogen dioxide is a brown-yellowish gas that transforms into dinitrogen tetroxide when pressure rises in a closed container, becoming colourless. In turn, when the pressure goes down, the substance takes the original colouration. Therefore, there exists an exact value of the pressure for which the reaction occurs in both ways:
+\begin{center}
+\ce{2NO2(g) <=> N2O4(g)}
+\end{center}
+For reactions in equilibrium, the \textit{Law of Mass Action} states that there exists a constant that depends on the temperature. It is called the equilibrium constant, which for a reaction (we will denote it $r_1$ for later reference)
+\begin{center}
+\ce{$a$A + $b$B + $\dots$ <=> $g$G + $h$H + $\dots$}
+\end{center}
+is given by the formula
+\begin{equation}
+K_c = \frac{[G]^g\cdot [H]^h\cdot\dots}{[A]^a\cdot [B]^b\cdot\dots},
+\end{equation}
+where $[X]$ is the concentration of the substance X. It is convenient to define as well the three constants
+\begin{equation}
+K_P = \frac{P_G^g\cdot P_H^h\cdot\dots}{P_A^a\cdot P_B^b\cdot\dots}, \qquad K_\chi = \frac{\chi_G^g\cdot\chi_H^h\cdot\dots}{\chi_A^a\cdot \chi_B^b\cdot\dots}, \qquad \text{and} \qquad K_n = \frac{n_G^g\cdot n_H^h\cdot\dots}{n_A^a\cdot n_B^b\cdot\dots},
+\end{equation}
+which are related through the expressions
+\begin{equation}
+K_P = K_c(RT)^{\Delta n} = K_n\left(\frac{RT}{V}\right)^{\Delta n} = K_\chi P^{\Delta n},
+\end{equation}
+where $\Delta n= g + h + \dots - (a + b + \dots)$. Moreover, if we denote by $r_2$ the inverse reaction, by $r_3$ the same reaction with different stoichiometric coefficients and by $r_4$ the reaction consisting of $r_1$ and $r_3$ happening simultaneously:
+\begin{align}
+\cee{$g$G + $h$H + $\dots$ & <=> $a$A + $b$B + $\dots$}, \\
+\cee{$ak$A + $bk$B + $\dots$ & <=> $gk$G + $hk$H + $\dots$},\\
+\cee{$a$A + $b$B + $ak$A + $bk$B + $\dots$ & <=> $g$G + $h$H + $gk$G + $hk$H + $\dots$},
+\end{align}
+where $k\in\mN$, then their equilibrium constants are affected by
+\begin{equation}
+K_{c_{2}} = K_c^{-1}, \qquad K_{c_{3}} = K_c^k, \qquad \text{and} \qquad K_{c_{4}} = K_c K_{c_{3}},
+\end{equation}
+where $K_{c_i}$ is the equilibrium constant of the reaction $r_i$.
+It is important to have an intuitive approach of what the equilibrium constant means. For large values of $K_c$, there are almost no reagents left (we sometimes say that the reaction is complete). In contrast, if $K_c$ is small, the reaction does not occur significantly. In order to predict which way the reaction goes, we need to define the \textit{reaction quotient}
+\begin{equation}
+Q_c= \frac{[G]_0^g\cdot [H]_0^h\cdot\dots}{[A]_0^a\cdot [B]_0^b\cdot\dots},
+\end{equation}
+where $[X]_0$ is the initial concentration of the substance X. Then, if $Q_c<K_c$, the reaction \quotes{goes to the right}, if $Q_c>K_c$, the reaction \quotes{goes to the left} and if $Q_c=K_c$, the reaction is in equilibrium.
+\end{document}

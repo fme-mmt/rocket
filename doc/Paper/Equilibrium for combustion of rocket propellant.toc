@@ -1,0 +1,11 @@
+\select@language {british}
+\contentsline {section}{\numberline {1}Preliminaries}{1}{section.1}
+\contentsline {subsection}{\numberline {1.1}Review of Kinetic Molecular Theory}{1}{subsection.1.1}
+\contentsline {paragraph}{Ideal Gases}{1}{section*.3}
+\contentsline {paragraph}{Mixture of gases}{2}{section*.4}
+\contentsline {subsection}{\numberline {1.2}Review of Thermodynamics}{2}{subsection.1.2}
+\contentsline {paragraph}{First Law of Thermodynamics}{2}{section*.5}
+\contentsline {paragraph}{Second Law of Thermodynamics}{3}{section*.6}
+\contentsline {paragraph}{Third Law of Thermodynamics}{3}{section*.7}
+\contentsline {paragraph}{Spontaneity}{3}{section*.8}
+\contentsline {subsection}{\numberline {1.3}Review of Chemical Equilibrium}{4}{subsection.1.3}

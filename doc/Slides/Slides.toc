@@ -1,0 +1,8 @@
+\beamer@endinputifotherversion {3.36pt}
+\select@language {british}
+\beamer@sectionintoc {1}{Statement of the problem}{3}{0}{1}
+\beamer@sectionintoc {2}{Preliminary concepts}{5}{0}{2}
+\beamer@subsectionintoc {2}{1}{Review of Kinetic Molecular Theory}{5}{0}{2}
+\beamer@subsectionintoc {2}{2}{Review of Thermodynamics}{8}{0}{2}
+\beamer@subsectionintoc {2}{3}{Review of Chemical Equilibrium}{15}{0}{2}
+\beamer@sectionintoc {3}{Our approach to the problem}{19}{0}{3}
