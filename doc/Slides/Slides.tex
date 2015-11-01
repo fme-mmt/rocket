@@ -102,21 +102,14 @@
 \begin{frame}
 \frametitle{Motivation}
 \begin{itemize}
-\item Reactions of combustion at high temperatures.
-\item Dissociation of species.
-\item Examples: propulsion of rockets.
-\item Provide a solver for combustion of gas mixtures.
+\item Rocket propellant is a material used by a rocket that reacts chemically, ejecting a reaction mass withvery high speed to produce thrust, and thus provide spacecraft propulsion.
+\item The type of propellant varies depending on the type of rocket.
+\item We focus on rockets that are propelled by means of combustion reactions, which are exothermic and which happen at high temperatures.
+\item Under these conditions, the components dissociate, which makes the parameters of the reaction dicult to find.\item Our aim is to determine the parameters of the reaction at the same time as we provide a full open-source solver for combustion problems involving a gas mixture with dissociation.
 \end{itemize}
 \end{frame}
 
 %------------------------------------------------
-
-\begin{frame}
-\frametitle{How does a rocket work?}
-\begin{figure}
-\includegraphics[width=0.5\linewidth]{rocket}
-\end{figure}
-\end{frame}
 
 \section{Preliminary concepts}
 
@@ -127,40 +120,29 @@
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{How gases behave I}
-\begin{block}{Ideal gases}
+\frametitle{Basics I}
+\begin{block}{Conservation of Mass Law}
+In any chemical reaction, the sum of the masses of the reagents is equal to the sum of the masses of the products.
+\end{block}
+\begin{block}{Ideal Gases Law}
 Given the pressure $P$, volume $V$ and temperature $T$ of an ideal gas,
 \begin{equation*}
 PV=nRT, \ R=0,082 \text{ atm}\cdot\text{L}\cdot\text{mol}^{-1}\cdot\text{K}^{-1},
 \end{equation*}
-where $n$ is the number of moles contained in the gas. An equivalent expression is
-\begin{equation*}
-PM=\rho RT,
-\end{equation*}
-where $M$ is the molecular mass of the gas and $\rho$ is its density.
+where $n$ is the number of moles contained in the gas.
 \end{block}
 \end{frame}
 
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{How gases behave II}
+\frametitle{Basics II}
 \begin{block}{Dalton's Law of Partial Pressures}
 The total pressure of a mixture of gases equals the sum of the partial pressures. Mathematically, given a mixture of $n$ gases in a container,
 \begin{equation*}
-P = \sum_{i = 1}^n P_i.
-\end{equation*}
-We can express the partial pressure of each component in the mixture as
-\begin{equation*}
-P_i = n_i\frac{RT}{V} = n_i\frac{P}{n} = \frac{n_i}{n}P = \chi_i P,
+P = \sum_{i = 1}^n P_i, \qquad P_i = n_i\frac{RT}{V} = n_i\frac{P}{n} = \frac{n_i}{n}P = \chi_i P.
 \end{equation*}
 \end{block}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{How gases behave III}
 \begin{block}{Molar fraction}
 The molar fraction $\chi_i$ of the gas $i$ is
 \begin{equation*}
@@ -181,75 +163,52 @@ The total energy of an isolated system is constant. Mathematically, we write
 \begin{equation*}
 \Delta U = Q + W,
 \end{equation*}
-where $U$ is the internal energy, $Q$ is the heat involved in the process and $W$ is the work performed through compression or expansion of the system, which can be written as
+where $U$ is the internal energy, $Q$ is the heat involved in the process and
 \begin{equation*}
-W = -P_{\text{ext}}\Delta V = -\Delta nRT,
+W = -P_{\text{ext}}\Delta V = -\Delta nRT
 \end{equation*}
-where $P_{\text{ext}}$ is the pressure that the exterior exerts upon the gas and $\Delta n$ is the variation in the number of moles.
+is the work performed through compression or expansion of the system, where $P_{\text{ext}}$ is the pressure that the exterior exerts upon the gas and $\Delta n$ is the variation in the number of moles.
 \end{frame}
 
 %------------------------------------------------
 
 \begin{frame}
 \frametitle{Constant-volume and constant-pressure reactions}
-If a reaction occurs at a constant volume, there is no work performed. Hence,
-\begin{equation*}
-\Delta U = Q_v,
-\end{equation*}
-where the constant-volume heat can be written as  $ Q_v = Q_p + W$.
 \begin{block}{Enthalpy}
 Let us define the \textit{enthalpy} $H$ as
 \begin{equation*}
 H = U + PV.
 \end{equation*}
-Indeed, in constant-pressure systems we can write
-\begin{equation*}
-\Delta H = (U_f + PV_f) - (U_i + PV_i) = \Delta U + P\Delta V,
-\end{equation*}
-and so $\Delta H = Q_p$.
 \end{block}
-It is important to notice that enthalpy is a thermodynamic potential
+It is important to notice that enthalpy is a thermodynamic potential, so in order to measure the enthalpy of a system, we must refer to a defined reference point. Therefore what we measure is the change in enthalpy, $\Delta H$.
 \end{frame}
 
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Enthalpies of reaction}
-\begin{block}{Standard enthalpy of reaction}
-The standard enthalpy of reaction $\Delta H_r^0$ is the change in the enthalpy of a reaction in which the reagents and products are at standard conditions of pressure and temperature (if not stated differently).
-\end{block}
-\begin{block}{Standard enthalpy of formation}
-The standard enthalpy of formation $\Delta H_f^0$ corresponds to the formation of 1 mol of a substance from the basic elements in the standard states of reference.
-\end{block}
-Other particular cases are
+\frametitle{Particular cases of enthalpies}
 \begin{itemize}
-\item reticular energy
-\item bond dissociation energy
+\item Standard enthalpy of reaction $\Delta H_r^0$
+\item Standard enthalpy of formation $\Delta H_f^0$ for 1 mol of a substance from the basic elements in the standard states of reference
+\item Reticular energy
+\item Bond dissociation energy
 \end{itemize}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Ways to calculate enthalpies}
-\begin{block}{From enthalpies of formation}
-The standard enthalpy of a reaction $\Delta H_r^0$ can be calculated using the formula
+One may calculate
 \begin{equation*}
 \Delta H_r^0=\sum_{p\in P}v_p\Delta H_f^0(p) - \sum_{r\in R} v_r\Delta_f^0(r),
 \end{equation*}
 where $P$ and $R$ are the set of products and reagents, respectively, and $v_p$ and $v_r$ are the stoichiometric coefficients in the reaction.
-\end{block}
-\begin{block}{Hess's Law}
-If a reaction can be expressed as the sum of several elementary reactions, then the variation in the enthalpy of the reaction can be calculated adding up the variations in the enthalpy of each elementary reaction.
-\end{block}
 \end{frame}
 
 %------------------------------------------------
 
 \begin{frame}
 \frametitle{Enthalpy diagrams}
+\begin{block}{Hess's Law}
+If a reaction can be expressed as the sum of several elementary reactions, then the variation in the enthalpy of the reaction can be calculated adding up the variations in the enthalpy of each elementary reaction.
+\end{block}
 \begin{figure}
-\includegraphics[width=0.9\linewidth]{hess-law}
+\includegraphics[width=0.8\linewidth]{hess-law}
 \end{figure}
 \end{frame}
 
@@ -258,11 +217,14 @@ If a reaction can be expressed as the sum of several elementary reactions, then 
 \begin{frame}
 \frametitle{Second and Third Laws of Thermodynamics}
 \begin{block}{Second Law of Thermodynamics}
-The entropy is a measure of disorder, and for an isolated system it never decreases, but grows until the thermodynamic equilibrium is attained. For a given system, the change in entropy can be expressed as
+Given a thermodynamical system, the change in entropy can be expressed as
 \begin{equation*}
 \Delta S = \frac{Q_{\text{rev}}}{T},
 \end{equation*}
-where $Q_{\text{rev}}$ is the reversible heat or heat that intervenes in a reversible process.
+where $Q_{\text{rev}}$ is the heat that intervenes in a reversible process. Alternatively,
+\begin{equation*}
+\Delta S_{\text{universe}} = \Delta S_{\text{system}} + \Delta S_{\text{environment}}>0.
+\end{equation*}
 \end{block}
 \begin{block}{Third Law of Thermodynamics}
 The entropy of a perfect pure crystal at 0 K is zero.
@@ -273,15 +235,14 @@ The entropy of a perfect pure crystal at 0 K is zero.
 
 \begin{frame}
 \frametitle{Spontaneity} 
-We can assume that the variation in the entropy of the environment is due to $-\Delta H_{\text{system}}$. Hence,
-\begin{equation*}
-0<\Delta S_{\text{universe}} = \Delta S_{\text{system}} + \Delta S_{\text{environment}}=\Delta S_{\text{system}}-\frac{\Delta H_{\text{system}}}{T},
-\end{equation*}
-so $\Delta H_{\text{system}} - T\Delta S < 0$.
+If we assume that the variation in the entropy of the environment is due to $-\Delta H_{\text{system}}$ and take into account the Second Law of Thermodynamics, we get $\Delta H_{\text{system}} - T\Delta S < 0$.
 \begin{block}{Gibbs free energy}
+We can then conveniently define
+\begin{equation*}
 G = H - TS.
+\end{equation*}
 \end{block}
-\begin{block}{Criteria for predicting the nature of a thermodynamic process.}
+\begin{block}{Criteria for predicting the nature of a thermodynamic process}
 \begin{table}[h]
 \begin{center}
 \begin{tabular}{cccc}
@@ -298,75 +259,6 @@ G = H - TS.
 
 %------------------------------------------------
 
-\subsection{Review of Chemical Equilibrium}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Chemical equilibrium I}
-Chemical equilibrium is a state in which the species involved remain constant along time
-\begin{block}{Law of Mass Action}
-Given the reaction
-\begin{center}
-\ce{$a$A + $b$B + $\dots$ <=> $g$G + $h$H + $\dots$}
-\end{center}
-there exists a constant that depends on the temperature. It is called the equilibrium constant and is calculated as
-\begin{equation*}
-K_c = \frac{[G]^g\cdot [H]^h\cdot\dots}{[A]^a\cdot [B]^b\cdot\dots},
-\end{equation*}
-where $[X]$ is the concentration of the substance X.
-\end{block}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Chemical equilibrium II}
-\begin{block}{Other equilibrium constants}
-The constants
-\begin{equation*}
-K_P = \frac{P_G^g\cdot P_H^h\cdot\dots}{P_A^a\cdot P_B^b\cdot\dots},  \ K_\chi = \frac{\chi_G^g\cdot\chi_H^h\cdot\dots}{\chi_A^a\cdot \chi_B^b\cdot\dots}, \ \text{and} \ K_n = \frac{n_G^g\cdot n_H^h\cdot\dots}{n_A^a\cdot n_B^b\cdot\dots}
-\end{equation*}
-are related through the expressions
-\begin{equation*}
-K_P = K_c(RT)^{\Delta n} = K_n\left(\frac{RT}{V}\right)^{\Delta n} = K_\chi P^{\Delta n},
-\end{equation*}
-where $\Delta n= g + h + \dots - (a + b + \dots)$.
-\end{block}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Chemical equilibrium III}
-\begin{block}{Relation between the constants of different reactions}
-Let us denote by $r_1$ the reaction
-\begin{center}
-\ce{$a$A + $b$B + $\dots$ <=> $g$G + $h$H + $\dots$}
-\end{center}
-and by $r_2$ and $r_3$ the inverse reaction and the same reaction with stoichiometric coefficients multiplied by $k\in\mN$, respectively. If $r_4$ is the reaction consisting of $r_1$ and $r_3$ happening simultaneously, then their equilibrium constants are affected by
-\begin{equation*}
-K_{c_{2}} = K_c^{-1}, \qquad K_{c_{3}} = K_c^k, \qquad \text{and} \qquad K_{c_{4}} = K_c K_{c_{3}},
-\end{equation*}
-where $K_{c_i}$ is the equilibrium constant of the reaction $r_i$.
-\end{block}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\frametitle{Chemical equilibrium IV}
-\begin{block}{Predicting which way a reaction goes}
-Let us define the reaction quotient $Q_c$ as
-\begin{equation*}
-Q_c= \frac{[G]_0^g\cdot [H]_0^h\cdot\dots}{[A]_0^a\cdot [B]_0^b\cdot\dots},
-\end{equation*}
-where $[X]_0$ is the initial concentration of the substance X. Then, if $Q_c<K_c$, the reaction \quotes{goes to the right}, if $Q_c>K_c$, the reaction \quotes{goes to the left} and if $Q_c=K_c$, the reaction is in equilibrium.
-\end{block}
-\end{frame}
-
-%------------------------------------------------
-
 \section{Our approach to the problem}
 
 %------------------------------------------------
@@ -374,7 +266,8 @@ where $[X]_0$ is the initial concentration of the substance X. Then, if $Q_c<K_c
 \begin{frame}
 \frametitle{Sketch of the procedure}
 \begin{itemize}
-\item Assume the only reagents are hydrogen and oxygen, through the species H$_2$, O$_2$, H$_2$O, H, O and OH$^-$. We would like to find which the reagents are.
+\item Chemical equilibrium is a state in which the species involved remain constant along time.
+\item We aim to determine some properties about a chemical reaction given the reagents. In particular, we wish to determine whether the chemical equilibrium is attained in reactions of combustion.
 \item There are infinitely many solutions and each one has an associated value for $G$.
 \item We can formulate a minimisation convex problem for the Gibbs free energy.
 \item The reaction that actually takes place is the one that has the minimum Gibbs free energy.
@@ -384,19 +277,41 @@ where $[X]_0$ is the initial concentration of the substance X. Then, if $Q_c<K_c
 %------------------------------------------------
 
 \begin{frame}
-\frametitle{Sketch of the procedure}
-\begin{block}{Optimisation problem for the Gibbs free energy}
-Let us consider the linear programming problem
-\begin{equation*}
-\left\{
-\begin{array}{lcl}
-\ds\min_{\bm x\in\mR^n} \Delta G = \Delta H-T\Delta S & &\text{objective function}\\
-\text{s.t.} & A\bm x \leq \bm 0 & \text{constrictions}\\
-& \bm l \leqslant \bm x \leqslant \bm u & \text{bounds}
-\end{array}
-\right.
-\end{equation*}
-\end{block}
+\frametitle{What has been done so far}
+\begin{itemize}
+\item Creation of a whole package in a Matlab© environment. This one includes:
+\begin{itemize}
+\item the \texttt{HGS} function that calculates properties of mixtures of gases
+\item the \texttt{fminineq} function that minimises the Gibbs free energy of a mixture of gases
+\end{itemize}
+\item In comparison to the Matlab's \texttt{fmincon} function, \texttt{fminineq} performs successfully in a variety of cases. However, it does not even provide similar results in others.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{What we intend to do}
+\begin{itemize}
+\item State an optimization problem for the Gibbs? energy.
+\item Come up with a open-source (Python-based) numeric solving procedure for the problem.
+\item Compare it to the existing MATLAB (HGS Chemical Equation Solver) solution.
+\item Propose and explore improvements (speed, complexity, easy to use)
+\item Document the solution and upload it into a public repository.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{What we have done so far}
+\begin{itemize}
+\item State an optimization problem for the Gibbs? energy.
+\item Get familiar with the existing Matlab software (Burcat chemical elements database as well as the functions \texttt{fmincon}, \texttt{fminineq} and \texttt{hgs}).
+\item Start to programme a python-based solver.
+\end{itemize}
 \end{frame}
 
 %------------------------------------------------
