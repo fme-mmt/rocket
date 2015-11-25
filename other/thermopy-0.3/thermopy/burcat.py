@@ -248,7 +248,7 @@ class Mixture(object):
         # TODO: There is a bug in this routine.  Result is not correct.
         return R/self.mm*T/p
 
-    def extensive(self,attr,T):
+    def extensive(self,f):
         """
         Computes the extensive value for a mix.  Remember that an
         extensive value depends on the amount of matter. Enthalpy and
@@ -273,8 +273,9 @@ class Mixture(object):
             for comp in self.mix:
                 # Tricky use of getattr function to avoid cutting and
                 # pasting several times the very same code
-                iattr = getattr(comp[0],attr)
-                ext += comp[1] * comp[0].mm * iattr(T)
+                #iattr = getattr(comp[0],attr)
+                iattr = f(comp[0], comp[1])
+                ext += comp[1] * comp[0].mm * iattr
 
             return ext/Nm/Mm
 
@@ -283,27 +284,28 @@ class Mixture(object):
         Computes the heat capacity at a given temperature
 
         """
-        return self.extensive('cp_',T)
+        return self.extensive(lambda s: s.cp_(T))
 
     @property
     def cp(self):
         """
         Computes the heat capacity
         """
-        return self.extensive('cp_',298.15)
+        return self.extensive(lambda s: s.cp_(298.15))
 
     def ho(self,T):
-        return self.extensive('ho',T)
+        return self.extensive(lambda s: s.ho(T))
 
     def h(self,T):
         return self.cp_(T)*T
 
     def so(self,T):
         N = float(sum(n for _,n in self.mix))
-        return self.extensive('so',T) - R * sum(log(n/N) for _,n in self.mix if n > 0)
+        return self.extensive(lambda s,n: s.so(T) - R * log(n/N) if n > 0 else 0)
 
     def go(self,T):
-        return self.extensive('go',T)
+        N = float(sum(n for _,n in self.mix))
+        return self.extensive(lambda s,n: s.go(T) - R * log(n/N) if n > 0 else 0)
 
     def __repr__(self):
         str="<Mixture>:"
