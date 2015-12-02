@@ -1,0 +1,356 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "```[Cp,Cv,MM,Rg,gamma,a,H,G,S]=hgsprop({'O2','N2'},[2 4],2700,8)\n",
+    "Cp =\n",
+    "   0.0377\n",
+    "Cv =\n",
+    "   0.0294\n",
+    "MM =\n",
+    "  29.3419\n",
+    "Rg =\n",
+    "   0.2834\n",
+    "gamma =\n",
+    "   1.2827\n",
+    "a =\n",
+    "  990.6580\n",
+    "H =\n",
+    "  499.0400\n",
+    "G =\n",
+    "  -3.6607e+03\n",
+    "S =\n",
+    "    1.5406```"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "from thermopy.burcat import Elementdb, Element, R, Kelvin, atm\n",
+    "db = Elementdb()\n",
+    "NTP = 293.15 * Kelvin, 1 * atm\n",
+    "STP = 273.15 * Kelvin, 1 * atm"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "O2 = 'O2 REF ELEMENT'\n",
+    "N2 = 'N2  REF ELEMENT'\n",
+    "T = 2700 * Kelvin"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "m = db.getmixturedata([(O2, 2), (N2, 4)])\n",
+    "o2 = m.mix[0][0]\n",
+    "n2 = m.mix[1][0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<element> O2 REF ELEMENT\n",
+      "31.9988 gram / mole\n",
+      "  NTP: 1.33022691475 kilogram / meter ** 3\n",
+      "  STP: 1.42762592003 kilogram / meter ** 3\n",
+      "<element> N2  REF ELEMENT\n",
+      "28.0134 gram / mole\n",
+      "  NTP: 1.16454925352 kilogram / meter ** 3\n",
+      "  STP: 1.24981736654 kilogram / meter ** 3\n"
+     ]
+    }
+   ],
+   "source": [
+    "for s in (o2,n2):\n",
+    "    print s\n",
+    "    print s.mm.to('g/mole')\n",
+    "    print '  NTP:', s.density(NTP[1], NTP[0]).to('kg/m**3')\n",
+    "    print '  STP:', s.density(STP[1], STP[0]).to('kg/m**3')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "8.314472 joule/(kelvin mole)"
+      ],
+      "text/latex": [
+       "$8.314472 \\frac{joule}{\\left(kelvin \\cdot mole\\right)}$"
+      ],
+      "text/plain": [
+       "<Quantity(8.314472, 'joule / kelvin / mole')>"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "R"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "0.0377979915911 kilojoule/(kelvin mole)"
+      ],
+      "text/latex": [
+       "$0.0377979915911 \\frac{kilojoule}{\\left(kelvin \\cdot mole\\right)}$"
+      ],
+      "text/plain": [
+       "<Quantity(0.0377979915911, 'kilojoule / kelvin / mole')>"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cp = m.cpo(T).to('kJ/K/mole')\n",
+    "cp"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "29.3418666667 gram/mole"
+      ],
+      "text/latex": [
+       "$29.3418666667 \\frac{gram}{mole}$"
+      ],
+      "text/plain": [
+       "<Quantity(29.3418666667, 'gram / mole')>"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "m.mm.to('g/mole')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "0.283365475498 joule/(gram kelvin)"
+      ],
+      "text/latex": [
+       "$0.283365475498 \\frac{joule}{\\left(gram \\cdot kelvin\\right)}$"
+      ],
+      "text/plain": [
+       "<Quantity(0.283365475498, 'joule / gram / kelvin')>"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "Rg = (R/m.mm)\n",
+    "Rg.to('J/K/g')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "1.28200405227 dimensionless"
+      ],
+      "text/latex": [
+       "$1.28200405227 dimensionless$"
+      ],
+      "text/plain": [
+       "<Quantity(1.28200405227, 'dimensionless')>"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "gamma = cp/(cp - R)\n",
+    "gamma"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "990.375866644 meter/second"
+      ],
+      "text/latex": [
+       "$990.375866644 \\frac{meter}{second}$"
+      ],
+      "text/plain": [
+       "<Quantity(990.375866644, 'meter / second')>"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "((gamma * Rg * T)**0.5).to('m/s')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "578512.880105 joule/kilogram"
+      ],
+      "text/latex": [
+       "$578512.880105 \\frac{joule}{kilogram}$"
+      ],
+      "text/plain": [
+       "<Quantity(578512.880105, 'joule / kilogram')>"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "m.h(T)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "0.1760512 kilogram/mole"
+      ],
+      "text/latex": [
+       "$0.1760512 \\frac{kilogram}{mole}$"
+      ],
+      "text/plain": [
+       "<Quantity(0.1760512, 'kilogram / mole')>"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "sum(s.mm*n* for s,n in m.mix)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
