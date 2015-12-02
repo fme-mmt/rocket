@@ -42,12 +42,11 @@ def ucheck(suret, *suargs):
         def func_wrapper(*args, **kw):
             assert len(args) == len(uargs)
             for unit,arg in zip(uargs,args):
-                if not unit: continue
-                if not (arg/unit).dimensionless:
+                if unit and not (arg/unit).dimensionless:
                     raise DimensionalityError(arg.units, unit)
             ret = func(*args, **kw)
-            if uret:
-                assert (ret/uret).dimensionless
+            if uret and not (ret/uret).dimensionless:
+                raise DimensionalityError(ret.units, uret)
             return ret
         return func_wrapper
     return ucheck_decorator
@@ -122,15 +121,16 @@ class Element(object):
         return self.cp_(298 * ureg('K'))
 
     @ucheck('J/mol', None, 'K')
-    def ho(self,T):
+    def ho(self,Tu):
         """
         Computes the sensible enthalpy in J/mol
         """
+        T = Tu.magnitude
         Ta = array([1,T/2,T**2/3,T**3/4,T**4/5,1/T],'d')
         if T > 200 and T < 1000:
-            return dot(self.Tmin_[:6],Ta)*R*T
+            return dot(self.Tmin_[:6],Ta)*R*Tu
         elif T >1000 and T < 6000:
-            return dot(self._Tmax[:6],Ta)*R*T
+            return dot(self._Tmax[:6],Ta)*R*Tu
         else:
             raise ValueError("Temperature out of range")
 
@@ -142,10 +142,11 @@ class Element(object):
         return self.cp_(T)*T
 
     @ucheck('J/mol/K', 'K')
-    def so(self,T):
+    def so(self,Tu):
         """
         Computes enthropy in J/mol K
         """
+        T = Tu.magnitude
         Ta = array([log(T),T,T**2/2,T**3/3,T**4/4,0,1],'d')
         if T > 200 and T < 1000:
             return dot(self.Tmin_,Ta)*R
