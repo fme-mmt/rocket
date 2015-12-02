@@ -23,8 +23,36 @@ import doctest
 import copy
 import os
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
+Kelvin = ureg('K')
+atm = ureg('atm')
+
 # Universal gas constant R
-R = 8.314472
+R = 8.314472 * ureg('J/mol/K')
+
+
+
+def ucheck(suret, *suargs):
+    from pint import DimensionalityError
+    uret = ureg(suret) if suret else None
+    uargs = [ureg(s) if s else None for s in suargs]
+    def ucheck_decorator(func):
+        def func_wrapper(*args, **kw):
+            assert len(args) == len(uargs)
+            for unit,arg in zip(uargs,args):
+                if not unit: continue
+                if not (arg/unit).dimensionless:
+                    raise DimensionalityError(arg.units, unit)
+            ret = func(*args, **kw)
+            if uret:
+                assert (ret/uret).dimensionless
+            return ret
+        return func_wrapper
+    return ucheck_decorator
+
+
 
 class Element(object):
     """
@@ -48,31 +76,38 @@ class Element(object):
         self.formula = formula
         self.Tmin_ = Tmin_
         self._Tmax = _Tmax
-        self.mm = mm
+        self.mm = mm * ureg('kg/mol')
         self.hfr = hfr
         self.elements = elements
 
+
+    @ucheck('kg/m**3', None, 'Pa', 'K')
     def density(self,p,T):
         """
         Density.
         """
         return p*self.mm/R/T
 
-    def cpo(self,T):
+    @ucheck('J/mol/K', None, 'K')
+    def cpo(self,Tu):
         """
         Calculates the specific heat capacity in J/mol K
         """
         # I know perfectly that the most efficient way of evaluatin
         # polynomials is recursively but I want the implementation to
         # be as explicit as possible
+
+        T = Tu.magnitude
         Ta = array([1,T,T**2,T**3,T**4],'d')
         if T > 200 and T <= 1000:
-            return dot(self.Tmin_[:5],Ta)*R
+            coefs = self.Tmin_
         elif T >1000 and T < 6000:
-            return dot(self._Tmax[:5],Ta)*R
+            coefs = self._Tmax
         else:
             raise ValueError("Temperature out of range")
+        return dot(coefs[:5],Ta) * R
 
+    @ucheck('J/kg/K', None, 'K')
     def cp_(self,T):
         """
         Computes the specific heat capacity in J/kg K for a given temperature
@@ -84,8 +119,9 @@ class Element(object):
         """
         Computes the specific heat capacity in J/kg K at 298 K (Reference T)
         """
-        return self.cp_(298)
+        return self.cp_(298 * ureg('K'))
 
+    @ucheck('J/mol', None, 'K')
     def ho(self,T):
         """
         Computes the sensible enthalpy in J/mol
@@ -98,12 +134,14 @@ class Element(object):
         else:
             raise ValueError("Temperature out of range")
 
+    @ucheck('J/kg', 'K')
     def h(self,T):
         """
         Computes the total enthalpy in J/kg
         """
         return self.cp_(T)*T
 
+    @ucheck('J/mol/K', 'K')
     def so(self,T):
         """
         Computes enthropy in J/mol K
@@ -117,6 +155,7 @@ class Element(object):
             raise ValueError("Temperature out of range")
 
 
+    @ucheck('J/mol', 'K')
     def go(self,T):
         """
         Computes the Gibbs free energy from the sensible enthalpy in
@@ -279,33 +318,40 @@ class Mixture(object):
 
             return ext/Nm/Mm
 
+    @ucheck('J/kg/K', None, 'K')
     def cp_(self,T):
         """
         Computes the heat capacity at a given temperature
 
         """
-        return self.extensive(lambda s: s.cp_(T))
+        N = float(sum(n for _,n in self.mix))
+        return self.extensive(lambda s,_: s.cp_(T))/N
 
     @property
     def cp(self):
         """
         Computes the heat capacity
         """
-        return self.extensive(lambda s: s.cp_(298.15))
+        return self.cp_(298.15)
+
+    @ucheck('J/K/mol', None, 'K')
+    def cpo(self, T):
+        return self.extensive(lambda s,_: s.cpo(T))
+
 
     def ho(self,T):
-        return self.extensive(lambda s: s.ho(T))
+        return self.extensive(lambda s,_: s.ho(T))
 
     def h(self,T):
         return self.cp_(T)*T
 
     def so(self,T):
         N = float(sum(n for _,n in self.mix))
-        return self.extensive(lambda s,n: s.so(T) - R * log(n/N) if n > 0 else 0)
+        return self.extensive(lambda s,n: s.so(T) - R/s.mm * log(n/N) if n > 0 else 0)
 
     def go(self,T):
         N = float(sum(n for _,n in self.mix))
-        return self.extensive(lambda s,n: s.go(T) - R * log(n/N) if n > 0 else 0)
+        return self.extensive(lambda s,n: s.go(T) - R/s.mm * log(n/N) if n > 0 else 0)
 
     def __repr__(self):
         str="<Mixture>:"
