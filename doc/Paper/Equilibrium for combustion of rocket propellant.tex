@@ -79,7 +79,7 @@
 
 
 % CHEM%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[version=3]{mhchem}
+%\usepackage[version=3]{mhchem}
 
 
 % BIB %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -263,4 +263,30 @@ It is important to have an intuitive approach of what the equilibrium constant m
 Q_c= \frac{[G]_0^g\cdot [H]_0^h\cdot\dots}{[A]_0^a\cdot [B]_0^b\cdot\dots},
 \end{equation}
 where $[X]_0$ is the initial concentration of the substance X. Then, if $Q_c<K_c$, the reaction \quotes{goes to the right}, if $Q_c>K_c$, the reaction \quotes{goes to the left} and if $Q_c=K_c$, the reaction is in equilibrium.
+
+\section{Existent solvers}
+\subsection{Basic procedure}
+As we previously stated the aim of this project was to develop a solver that given a set of chemical compounds and environmental conditions (temperature, pressure) returnes the products of the chemical reaction that takes place, especially at high temperatures when the compounds disassociate.\\
+There are already solvers that do this, and they are all based in the following: of all the possible reactions, the one that takes place is the one that minimizes the Gibbs free energy.\\
+It follows then that the solvers have to be able to compute the properties of the compunds (molar mass, partial pressure, etc.) in order to compute the enthalpy and enthropy of the reaction, and once this is done they have to solve a minimization problem.\\
+The minimization problem can be stated as:\\
+Minimize G such that the mols of every compound are non negative and the initial mols of each element present in the reaction is conserved.\\
+The enthalpy and enthropy of a reaction are computed using the Burcat database, a database that gives the coefficents of interpolation polynomials for the enthalpy and enthropy of every known chemical compund. 
+\subsection{HGS}
+HGS is a Matlab based solver that works for every combustion reaction. It is the solver we wanted to base ours on, so the only problem it has is that it uses Matlab's black-box minimizing functions.
+\subsection{Thermopy}
+Thermopy is a pyhton-based solver that gives the properties of each element and attempts to give the values of the enthalpy, enthropy and Gibbs free energy of combustion reactions, but the results obtained with Thermopy aren't the same as the results obtained with HGS.\\ 
+Since our idea was to "implement HGS in python" we attempted to fix the issues thermopy has regarding the computation of properties, and adding the minimization problem to be solved with a python minimizing function to get the final solution (i.e. products of a reaction).
+\section{Modified Thermopy}
+\subsection{Minimizing problem}
+FALTA ESCRIURE EL PROBLEMA DE MINIMITZACIO D'UNA MANERA CONCISA
+Python's minimizing functions couldn't solve this problem because the Jacobian of the function was singular in some point, so we changed the formulation of the problem in a way that we eliminated restrictions by including them in the function to minimize, and at the same time avoided the singularity of the Jacobian.
+The alternative formulation of the problem is:\\
+Minimze $F = G + \lambda \lVert x_{0} - x \lVert$ such that $n_{i} \geq 0 \forall i$. % %les n son els mols dels compostos, les x els mols dels elements
+\subsection{Compound properties}
+Once the minimization problem was solved we found that the solutions given by Thermopy had a smaller Gibbs free energy than the ones given by HGS but were not consistent with the real reactions that take lace at high temperatures, so going back to the properties we found that it doesn't give the same values. We attempted to fix this in several ways:
+\begin{itemize}
+\item We took into account partial pressures, which Thermopy wasn't doing. This in theory would give us the same values for enthalpy and enthropy that HGS gives.
+\item We introduced a subroutine that checks if the units of the properties computed check. This was very useful for detecting where the errors were, if there were errors in the formulas used to calculate properties of compounds.
+\end{itemize}
 \end{document}
