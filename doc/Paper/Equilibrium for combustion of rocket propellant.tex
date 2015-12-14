@@ -265,13 +265,13 @@ Q_c= \frac{[G]_0^g\cdot [H]_0^h\cdot\dots}{[A]_0^a\cdot [B]_0^b\cdot\dots},
 where $[X]_0$ is the initial concentration of the substance X. Then, if $Q_c<K_c$, the reaction \quotes{goes to the right}, if $Q_c>K_c$, the reaction \quotes{goes to the left} and if $Q_c=K_c$, the reaction is in equilibrium.
 \section{Existent solvers}
 \subsection{Basic procedure}
-As previously stated, the aim of this project is to develop an open-source solver that, given a set of chemical compounds and environmental conditions (e.g. temperature and pressure), returns the products of chemical reactions that take place at high temperatures, in which cases the compounds dissociate. There are already solvers that do this, and they are all based in the following: of all the possible reactions, the one that takes place is the one that minimises the Gibbs free energy of the mixture of compounds, which one may calculate from their temperature, enthalpy and entropy.
+As previously stated, the aim of this project is to develop an open-source solver that, given a set of chemical compounds and environmental conditions (e.g. temperature and pressure), returns the products of chemical reactions that take place at high temperatures, in which case the compounds dissociate. There are already solvers that do this, and they are all based in the following: of all the possible reactions, the one that takes place is the one that minimises the Gibbs free energy of the mixture of compounds, which one may calculate from their temperature, enthalpy and entropy.
 
 It follows then that the solvers have to be able to compute the properties of the compounds (e.g. molar mass and partial pressure) in order to compute the enthalpy and entropy of the reaction, and once this is done they have to solve a minimisation problem of the objective function $G$, that depends on the number of moles of each compound in the mixture, restricted to certain conditions that we see later in further detail.
 
-The enthalpy and enthropy of a reaction are computed using the Burcat's database\footnote{Alexander Burcat, born in 1938 in Romania is a former professor of the Hebrew University of Jerusalem, where he obtained his PhD. In 1972 he initiated a database that provides the properties of chemical compounds.}, which gives the coefficents of interpolation polynomials for the enthalpy and entropy of every known chemical compound.
+The enthalpy and enthropy of a reaction are computed using the Burcat database\footnote{Alexander Burcat, born in 1938 in Romania is a former professor of the Hebrew University of Jerusalem, where he obtained his PhD. In 1972 he initiated a database that provides the properties of chemical compounds.}, which gives the coefficents of interpolation polynomials for the enthalpy and entropy of every known chemical compound.
 \subsection{HGS}
-The HGS package is a Matlab-based solver that works for every combustion reaction. It consists of ten different functions as well as the Burcat's database. Our initial objective was to replace this package by an open-source solver, which we chose to develop in python. However, some of the functions in the HGS package use Matlab's black-box minimising functions, so our basing the new solver on HGS requires the implementation of a brand-new minimising function in python.
+The HGS package is a Matlab-based solver that works for every combustion reaction. It consists of ten different functions as well as the Burcat database. Our initial objective was to replace this package by an open-source solver, which we chose to develop in python. However, some of the functions in the HGS package use Matlab's black-box minimising functions, that are known to be very powerful, so we'd have to find out if the pre-existent minimising functions for python can solve the problem as well.
 \subsection{Thermopy}
 On the other hand, thermopy is a pyhton-based solver that gives the properties of every chemical compound and attempts to give the values of the enthalpy, the entropy and the Gibbs free energy of combustion reactions. That notwithstanding, the results obtained with Thermopy do not correspond with those provided by the HGS package.
 
@@ -281,13 +281,13 @@ So as to \quotes{reproduce} the HGS package in python, what we have done is try 
 \subsection{Minimising problem}
 Let us introduce some notation in order to formulate the problem. Let $C = \{c_1,c_2,\dots,c_n\} $ be a set of compounds and $\bm n=(n_1,n_2,\dots,n_k)$ be a vector where $n_i$ is the number of moles of the $i-$th compound. Let $\bm e= (r_1,r_2,\dots,r_k)$ be the vector of elements. We define the matrix $A=(a_{ij})_{i,j=1}^n$, where $a_{ij}$ is the number of moles of the $j-$th element in each mole of the $i-$th compound.
 \begin{ex}
-If the set of compounds is $C = \{O_2,H_2O,H_2\}$, then the vector of the number of moles of each compound is $\bm n=(1,1,1)$, the vector of elements is $\bm e = (H,O)$ and
+To understand this better we give an example. If the set of compounds is $C = \{O_2,H_2O,H_2\}$, then the vector of elements is $\bm e = (H,O)$ and
 \begin{equation*}
 A = \begin{pmatrix}0&2\\ 2&1\\ 2&0
 \end{pmatrix}
 \end{equation*}
 \end{ex}
-Now we would like to minimise the Gibbs free energy $G$ (that depends on $\bm n$) with the restriction that the number of moles of every compound is non negative and that the initial number of moles $n_0^i$ of each element present in the reaction is conserved. This can be stated as the minimisation problem
+Now we would like to minimise the Gibbs free energy $G$ (that depends on $\bm n$) with the restriction that the number of moles of every compound is non negative and that the initial number of moles $n_0^i$ of each element present in the reaction is conserved (which is precisely the conservation of mass). This can be stated as the minimisation problem
 \begin{equation*}
 \begin{array}{ll}
 \displaystyle\min_{\bm n\in\mR^k} G(\bm n)\\
@@ -296,7 +296,6 @@ Now we would like to minimise the Gibbs free energy $G$ (that depends on $\bm n$
 \end{array}
 \end{equation*}
 Python's minimising functions cannot solve this problem because the Jacobian matrix of the function $G$ is singular at some points. This suggests changing the formulation of the problem in a way that restrictions are eliminated by including them in the function to minimise and at the same time the singularity of the Jacobian is avoided. This new formulation is
-The alternative formulation of the problem is
 \begin{equation*}
 \begin{array}{ll}
 \displaystyle\min_{\bm n\in\mR^k} f(n) = G(n) + \lambda \lVert \bm n\cdot A - \bm n_0\cdot A \lVert\\
@@ -310,21 +309,42 @@ The second formulation does allow us to solve the minimisation problem. In addit
 \end{align}
 whereas the reaction that actually takes place at $2700 K$ is
 \begin{align}
-\cee{H2 + O2 <=> H2 + O2 + H2O + H^+ + OH^- + O}.
+\cee{H2 + O2 <=> H2 + O2 + H2O + H + OH + O}.
 \end{align}
 As has been previously pointed out, this difference is due to the fact that Thermopy does not give the same values for the properties of some compounds, which leads us to looking into how exactly it calculates them.
 
-We have observed that the HGS package uses the partial pressures of the species of the mixture in order to calculate the entropy and enthalpy, whereas Thermopy does not. In order to get the same results, we need to replace the corresponding formulae for the partial pressures in the Burcat's database by the one that HGS uses. In spite of what one may think, since Thermopy does not give the same values for the enthalpy and entropy yet, so the problem remains unsolved.
+We have observed that the HGS package uses the partial pressures of the species of the mixture in order to calculate the entropy and enthalpy, whereas Thermopy does not. In order to get the same results, we need to replace the corresponding formulae for the partial pressures in Thermopy by the one that HGS uses. In spite of what one may think, Thermopy does not give the same values for the enthalpy and entropy after changing this, so the problem remains unsolved.
 
-Still trying to fix it, we have introduced a subroutine that checks if the units of the properties that Thermopy computes coincide. Although this subroutine is very useful for detecting where the problem occurred in case that there are errors in the formulae used to calculate the properties of compounds, we have eventually observed that this subroutine does not account for formulae whose units are the same but which are not equivalent. For instance, in order to calculate the entropy of the mixture, the HGS function computes the entropy of a mixture as
+Still trying to fix it, we have introduced a subroutine that checks if the units of the properties that Thermopy computes coincide. Although this subroutine is very useful for detecting where the problems occurred in case that there are errors in the formulae used to calculate the properties of compounds, we have eventually observed that this subroutine does not account for formulae whose units are the same but which are not equivalent. For instance, in order to calculate the entropy of the mixture, the HGS function computes the entropy of a mixture as
 \begin{equation}
 S = \frac{\sum_{i=1}^n S_i\cdot m_i}{\sum_{i=1}^n m_i},
 \end{equation}
-where $S_i$ and $m_i$ are, respectively, the entropy and the mass of each substance in the mixture (this is known as gravimetric analysis, which takes into account the masses of each of the components in order to calculate properties of a mixture). On the other hand, the Burcat's database uses the formula
+where $S_i$ and $m_i$ are, respectively, the entropy and the mass of each substance in the mixture (this is known as gravimetric analysis, which takes into account the masses of each of the components in order to calculate properties of a mixture). On the other hand, Thermopy uses the formula
 \begin{equation}
 S = \frac{\sum_{i=1}^n S_i\cdot n_i}{\sum_{i=1}^n n_i},
 \end{equation}
 where $S_i$ and $n_i$ are, respectively, the entropy and the number of moles of each substance in the mixture (this is known as molar analysis). Indeed, both formulae are equivalent as far as units are concerned, but they do not, however, give the same values. We do not know which of these two methods is the appropriate one (it is beyond our knowledge).
+\section{Examples}
+We present here some examples of the results obtained, and the comparison with the results given by HGS. First of all we consider the compounds 
+\begin{align}
+\cee{O2 + N2}.
+\end{align}
+The basic properties of these compounds given by HGS are
+%BLA BLA ES EL JASON QUE AL FINAL VAU CONSEGUIR OBRIR
+And computing the same example with the modified Thermopy we get
+%AL MATEIX JASON. LO DICHO.
+Now we give an example of our attempt to solve the minimisation problem. We consider the reaction
+\begin{align}
+\cee{H2 + O2 <=> H2 + O2 + H2O + H + OH + O}.
+\end{align}
+so $C = \{H_2,O_2, H_2O, H, O, OH\}$ with $n = (2,1,0,0,0,0)$ initial moles. At a temperature of $T = 2700K$ and pressure of $P = 1bar$ HGS says that the stable proportion of these compounds is
+%EL TIPIC Q A MATLAB TE EL NOM DE ALGUN DIA Q NO RECORDO
+Note that the Gibbs free energy of the reaction is then %SOMETHING
+Now if we look at what happens when we solve the minimisation problem with Thermopy, we get
+%PANTALLAZO
+so the final moles vector is %BLA BLA
+and the Gibbs free energy is %BLA BLA
+which is actually lower than the one given by HGS, but as we previously explained, this is a result of not having the same values for the enthalpy and entropy of the reaction, and the solution that comes closer to the reality is the one given by HGS.
 \section{Conclusions}
 {\color{red}ESCRIURE GUAI!
 
